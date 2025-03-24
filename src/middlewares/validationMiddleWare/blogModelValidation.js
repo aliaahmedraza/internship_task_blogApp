@@ -20,7 +20,6 @@ export const updatePostSchema = Joi.object({
     'object.min': 'At least one field (title, content, or author) is required for update.'
 });
 
-// Generic middleware for validating blog post requests
 export const validateRequest = (schema) => {
     return (req, res, next) => {
         const { error } = schema.validate(req.body, { abortEarly: false });

@@ -1,8 +1,6 @@
-// blogPostController.js
 import BlogPost from '../models/blogPostModel.js';
 import User from '../models/userModel.js';
 
-// Create a new post
 export const createPost = async (req, res) => {
     try {
         const { title, content, author } = req.body ?? {};
@@ -13,9 +11,9 @@ export const createPost = async (req, res) => {
             title,
             content,
             author,
-            likes: [],      // store user IDs who liked the post
-            dislikes: [],   // store user IDs who disliked the post
-            comments: []    // array of comment objects { user: userId, comment: text }
+            likes: [], 
+            dislikes: [], 
+            comments: []
         });
         const savedPost = await newPost.save();
         return res.status(201).json(savedPost);
@@ -25,7 +23,6 @@ export const createPost = async (req, res) => {
     }
 };
 
-// Get all posts
 export const getAllPosts = async (req, res) => {
     try {
         const posts = await BlogPost.find() ?? [];
@@ -36,7 +33,6 @@ export const getAllPosts = async (req, res) => {
     }
 };
 
-// Update a post
 export const updatePost = async (req, res) => {
     try {
         const { id } = req.params ?? {};
@@ -54,7 +50,6 @@ export const updatePost = async (req, res) => {
     }
 };
 
-// Delete a post
 export const deletePost = async (req, res) => {
     try {
         const { id } = req.params ?? {};
@@ -72,7 +67,6 @@ export const deletePost = async (req, res) => {
     }
 };
 
-// Like a post (delegated to userModel)
 export const likePost = async (req, res) => {
     try {
         const { id } = req.params ?? {};
@@ -80,7 +74,7 @@ export const likePost = async (req, res) => {
         if (!id || !userId) {
             return res.status(400).json({ message: "Post ID and userId are required." });
         }
-        const updatedPost = await User.likePost(userId, id);
+        const updatedPost = await BlogPost.likePost(userId, id);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -91,7 +85,6 @@ export const likePost = async (req, res) => {
     }
 };
 
-// Dislike a post (delegated to userModel)
 export const dislikePost = async (req, res) => {
     try {
         const { id } = req.params ?? {};
@@ -99,7 +92,7 @@ export const dislikePost = async (req, res) => {
         if (!id || !userId) {
             return res.status(400).json({ message: "Post ID and userId are required." });
         }
-        const updatedPost = await User.dislikePost(userId, id);
+        const updatedPost = await BlogPost.dislikePost(userId, id);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -110,7 +103,6 @@ export const dislikePost = async (req, res) => {
     }
 };
 
-// Add a comment to a post (delegated to userModel)
 export const addComment = async (req, res) => {
     try {
         const { id } = req.params ?? {};
@@ -118,7 +110,7 @@ export const addComment = async (req, res) => {
         if (!id || !userId || !comment) {
             return res.status(400).json({ message: "Post ID, userId and comment text are required." });
         }
-        const updatedPost = await User.addComment(userId, id, comment);
+        const updatedPost = await BlogPost.addComment(userId, id, comment);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -129,7 +121,6 @@ export const addComment = async (req, res) => {
     }
 };
 
-// Get all comments for a post (directly from BlogPost model)
 export const getComments = async (req, res) => {
     try {
         const { id } = req.params ?? {};
