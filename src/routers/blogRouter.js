@@ -12,18 +12,18 @@ import {
 } from '../controllers/blogController.js';
 import { validateRequest, createPostSchema, updatePostSchema } from '../middlewares/validationMiddleWare/blogModelValidation.js';
 
-const blogRouter = express.Router();
+const router = express.Router();
 
 // Public route: Anyone can view all posts.
-blogRouter.get('/', getAllPosts);
+router.get('/', getAllPosts);
 
 // Protected routes: Only authenticated users can perform these actions.
-blogRouter.post('/', AuthenticationMiddleware, validateRequest(createPostSchema), createPost);
-blogRouter.put('/:id', AuthenticationMiddleware, validateRequest(updatePostSchema), updatePost);
-blogRouter.delete('/:id', AuthenticationMiddleware, deletePost);
-blogRouter.patch('/:id/like', AuthenticationMiddleware, likePost);
-blogRouter.patch('/:id/dislike', AuthenticationMiddleware, dislikePost);
-blogRouter.post('/:id/comments', AuthenticationMiddleware, addComment);
-blogRouter.get('/:id/comments', AuthenticationMiddleware, getComments);
+router.post('/', AuthenticationMiddleware, validateRequest(createPostSchema), createPost);
+router.put('/:id', AuthenticationMiddleware, validateRequest(updatePostSchema), updatePost);
+router.delete('/:id', AuthenticationMiddleware, deletePost);
+router.patch('/:id/like', AuthenticationMiddleware, likePost);
+router.patch('/:id/dislike', AuthenticationMiddleware, dislikePost);
+router.post('/:id/comments', AuthenticationMiddleware, addComment);
+router.get('/:id/comments', AuthenticationMiddleware, getComments);
 
-export default blogRouter;
+export default router;
