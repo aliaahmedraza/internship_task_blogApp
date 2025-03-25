@@ -7,9 +7,9 @@ export const createPostSchema = Joi.object({
     content: Joi.string().min(1).required().messages({
         'string.empty': 'Content is required.'
     }),
-    author: Joi.string().min(1).required().messages({
-        'string.empty': 'Author is required.'
-    })
+    // author: Joi.string().min(1).required().messages({
+    //     'string.empty': 'Author is required.'
+    // })
 });
 
 export const updatePostSchema = Joi.object({

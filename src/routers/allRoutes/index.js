@@ -4,7 +4,7 @@ import blogRouter from "../blogRouter.js";
 import authRouter from "../authRouter.js";
 
 const allRoutes = Router();
-allRoutes.use("/users", userRouter);
-allRoutes.use("/posts", blogRouter);
-allRoutes.use("/auth", authRouter);
+allRoutes.use("/api/users", userRouter);
+allRoutes.use("/api/posts", blogRouter);
+allRoutes.use("/api/auth", authRouter);
 export default allRoutes;

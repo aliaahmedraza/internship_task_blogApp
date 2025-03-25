@@ -1,20 +1,28 @@
-import BlogPost from '../models/blogPostModel.js';
-import User from '../models/userModel.js';
-
+import blogPostModel from '../models/blogPostModel.js';
+import mongoose from "mongoose";
 export const createPost = async (req, res) => {
     try {
-        const { title, content, author } = req.body ?? {};
+        const { title, content } = req.body ?? {};
+
+        const author = req.user?.id;
+
         if (!title || !content || !author) {
             return res.status(400).json({ message: 'Title, content, and author are required.' });
         }
-        const newPost = new BlogPost({
+
+        if (!mongoose.Types.ObjectId.isValid(author)) {
+            return res.status(400).json({ message: "Invalid author ID." });
+        }
+
+        const newPost = new blogPostModel({
             title,
             content,
-            author,
-            likes: [], 
-            dislikes: [], 
+            author: new mongoose.Types.ObjectId(author),
+            likes: [],
+            dislikes: [],
             comments: []
         });
+
         const savedPost = await newPost.save();
         return res.status(201).json(savedPost);
     } catch (error) {
@@ -22,10 +30,38 @@ export const createPost = async (req, res) => {
         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
     }
 };
+// export const createPost = async (req, res) => {
+//     try {
+//         const { title, content } = req.body ?? {};
+//         const author = req.user?._id;
+//         if (!title || !content || !author) {
+//             return res.status(400).json({ message: 'Title, content, and author are required.' });
+//         }
+
+//         if (!mongoose.Types.ObjectId.isValid(author)) {
+//             return res.status(400).json({ message: "Invalid author ID." });
+//         }
+
+//         const newPost = new blogPostModel({
+//             title,
+//             content,
+//             author: new mongoose.Types.ObjectId(author),
+//             likes: [],
+//             dislikes: [],
+//             comments: []
+//         });
+
+//         const savedPost = await newPost.save();
+//         return res.status(201).json(savedPost);
+//     } catch (error) {
+//         console.error("Error in createPost:", error);
+//         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
+//     }
+// };
 
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await BlogPost.find() ?? [];
+        const posts = await blogPostModel.find().populate('author').populate('comments.user') ?? [];
         return res.status(200).json(posts);
     } catch (error) {
         console.error("Error in getAllPosts:", error);
@@ -39,7 +75,12 @@ export const updatePost = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Post ID is required." });
         }
-        const updatedPost = await BlogPost.findByIdAndUpdate(id, req.body, { new: true });
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid post ID." });
+        }
+
+        const updatedPost = await blogPostModel.findByIdAndUpdate(id, req.body, { new: true });
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -56,7 +97,12 @@ export const deletePost = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Post ID is required." });
         }
-        const deletedPost = await BlogPost.findByIdAndDelete(id);
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid post ID." });
+        }
+
+        const deletedPost = await blogPostModel.findByIdAndDelete(id);
         if (!deletedPost) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -74,7 +120,12 @@ export const likePost = async (req, res) => {
         if (!id || !userId) {
             return res.status(400).json({ message: "Post ID and userId are required." });
         }
-        const updatedPost = await BlogPost.likePost(userId, id);
+
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid Post ID or User ID." });
+        }
+
+        const updatedPost = await blogPostModel.likePost(userId, id);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -92,7 +143,12 @@ export const dislikePost = async (req, res) => {
         if (!id || !userId) {
             return res.status(400).json({ message: "Post ID and userId are required." });
         }
-        const updatedPost = await BlogPost.dislikePost(userId, id);
+
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid Post ID or User ID." });
+        }
+
+        const updatedPost = await blogPostModel.dislikePost(userId, id);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -110,7 +166,12 @@ export const addComment = async (req, res) => {
         if (!id || !userId || !comment) {
             return res.status(400).json({ message: "Post ID, userId and comment text are required." });
         }
-        const updatedPost = await BlogPost.addComment(userId, id, comment);
+
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid Post ID or User ID." });
+        }
+
+        const updatedPost = await blogPostModel.addComment(userId, id, comment);
         if (!updatedPost) {
             return res.status(404).json({ message: 'Post not found or action failed' });
         }
@@ -127,7 +188,12 @@ export const getComments = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Post ID is required." });
         }
-        const post = await BlogPost.findById(id);
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid Post ID." });
+        }
+
+        const post = await blogPostModel.findById(id).populate('comments.user');
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }

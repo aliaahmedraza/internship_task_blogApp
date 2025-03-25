@@ -21,13 +21,14 @@ const loginController = async (req, res) => {
 
         const token = jwt.sign(
             {
-                email: user.email,
-                id: user._id,
-                role: user.role
+                email: user?.email,
+                name: user?.name,
+                id: user?._id,
+                role: user?.role
             },
             process.env.JWT_SECRET_KEY,
             {
-                expiresIn: "1h",
+                expiresIn: "5h",
             }
         );
 
