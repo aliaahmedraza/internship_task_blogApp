@@ -189,10 +189,6 @@ export const getComments = async (req, res) => {
             return res.status(400).json({ message: "Post ID is required." });
         }
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: "Invalid Post ID." });
-        }
-
         const post = await blogPostModel.findById(id).populate('comments.user');
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
