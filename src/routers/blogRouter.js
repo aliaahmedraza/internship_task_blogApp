@@ -3,6 +3,7 @@ import AuthenticationMiddleware from "../middlewares/authenticationMiddleware/au
 import {
   createPost,
   getAllPosts,
+  getPostById,
   updatePost,
   deletePost,
   likePost,
@@ -17,6 +18,7 @@ import {
 } from "../middlewares/validationMiddleWare/blogModelValidation.js";
 
 const router = express.Router();
+router.get("/:id", getPostById);  
 router.get("/", getAllPosts);
 router.post(
   "/",

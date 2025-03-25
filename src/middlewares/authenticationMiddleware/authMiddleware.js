@@ -35,6 +35,8 @@ const AuthenticationMiddleware = async (req, res, next) => {
             role: user.role
             , name: user.name
         };
+        console.log("Auth Header:", authHeader);
+        console.log("Extracted Token:", token);
         console.log(req.user);
 
         next();

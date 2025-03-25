@@ -67,8 +67,8 @@ export const createUser = async (req, res) => {
         message: "A user with this email has already been registered",
       });
     }
-
-    const hashedPassword = await bcrypt.hash(password, process.env.SALT_ROUND);
+    const saltRounds = parseInt(process.env.SALT_ROUND, 10) || 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const user = await userModel.create({
       name,
