@@ -43,9 +43,10 @@ export const getAllPosts = async (req, res) => {
 
 export const getPostById = async (req, res) => {
   try {
-    const { id } = req.params;
+      const { id } = req.params;
+      const trimmedId = id.trim();
     const post = await blogPostModel
-      .findById(id)
+      .findById(trimmedId)
       .populate('author')
       .populate('comments.user');
     if (!post) {
@@ -101,82 +102,38 @@ export const deletePost = async (req, res) => {
         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
     }
 };
-
-// export const likePost = async (req, res) => {
-//     try {
-//         const { id } = req.params ?? {};
-//         const { userId } = req.body ?? {};
-//         if (!id || !userId) {
-//             return res.status(400).json({ message: "Post ID and userId are required." });
-//         }
-
-//         if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
-//             return res.status(400).json({ message: "Invalid Post ID or User ID." });
-//         }
-
-//         const updatedPost = await blogPostModel.likePost(userId, id);
-//         if (!updatedPost) {
-//             return res.status(404).json({ message: 'Post not found or action failed' });
-//         }
-//         return res.status(200).json(updatedPost);
-//     } catch (error) {
-//         console.error("Error in likePost:", error);
-//         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
-//     }
-// };
-// controllers/postController.js
 export const likePost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.user.id; // Assuming AuthenticationMiddleware attaches the user object
-    
-    // Logic to add the like (this is just an example)
-    const post = await blogPostModel.findById(postId);
+    const userId = req.user.id;
+    let post = await blogPostModel.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    
-    // Prevent duplicate likes
     if (!post.likes.includes(userId)) {
       post.likes.push(userId);
-      // Optionally remove dislike if user previously disliked the post
-      post.dislikes = post.dislikes.filter((id) => id.toString() !== userId);
+      post.dislikes = post.dislikes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
       await post.save();
     }
-    
-    return res.status(200).json(post);
+    const updatedPost = await blogPostModel
+      .findById(postId)
+      .populate("author")
+      .populate("comments.user");
+    return res.status(200).json(updatedPost);
   } catch (error) {
     console.error("Error liking post:", error);
-    return res.status(500).json({ message: error.message || "Internal Server Error" });
+    return res.status(500).json({
+      message: error.message || "Internal Server Error",
+    });
   }
 };
 
-// export const dislikePost = async (req, res) => {
-//     try {
-//         const { id } = req.params ?? {};
-//         const { userId } = req.body ?? {};
-//         if (!id || !userId) {
-//             return res.status(400).json({ message: "Post ID and userId are required." });
-//         }
-
-//         if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
-//             return res.status(400).json({ message: "Invalid Post ID or User ID." });
-//         }
-
-//         const updatedPost = await blogPostModel.dislikePost(userId, id);
-//         if (!updatedPost) {
-//             return res.status(404).json({ message: 'Post not found or action failed' });
-//         }
-//         return res.status(200).json(updatedPost);
-//     } catch (error) {
-//         console.error("Error in dislikePost:", error);
-//         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
-//     }
-// };
 export const dislikePost = async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.user.id; // Use the authenticated user's id
+    const userId = req.user.id;
 
     if (!postId || !userId) {
       return res
@@ -188,48 +145,35 @@ export const dislikePost = async (req, res) => {
       return res.status(400).json({ message: "Invalid Post ID." });
     }
 
-    // Assuming you have a dislikePost method in your model:
-    const updatedPost = await blogPostModel.dislikePost(userId, postId);
-    if (!updatedPost) {
-      return res
-        .status(404)
-        .json({ message: "Post not found or action failed" });
+    let post = await blogPostModel.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
+
+    if (!post.dislikes.includes(userId)) {
+      post.dislikes.push(userId);
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+      await post.save();
+    }
+    const updatedPost = await blogPostModel
+      .findById(postId)
+      .populate("author")
+      .populate("comments.user");
     return res.status(200).json(updatedPost);
   } catch (error) {
     console.error("Error in dislikePost:", error);
-    return res
-      .status(500)
-      .json({ error: error?.message ?? "Internal Server Error" });
+    return res.status(500).json({
+      error: error?.message || "Internal Server Error",
+    });
   }
 };
 
-// export const addComment = async (req, res) => {
-//     try {
-//         const { id } = req.params ?? {};
-//         const { userId, comment } = req.body ?? {};
-//         if (!id || !userId || !comment) {
-//             return res.status(400).json({ message: "Post ID, userId and comment text are required." });
-//         }
-
-//         if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
-//             return res.status(400).json({ message: "Invalid Post ID or User ID." });
-//         }
-
-//         const updatedPost = await blogPostModel.addComment(userId, id, comment);
-//         if (!updatedPost) {
-//             return res.status(404).json({ message: 'Post not found or action failed' });
-//         }
-//         return res.status(200).json(updatedPost);
-//     } catch (error) {
-//         console.error("Error in addComment:", error);
-//         return res.status(500).json({ error: error?.message ?? "Internal Server Error" });
-//     }
-// };
 export const addComment = async (req, res) => {
   try {
     const postId = req.params.id;
-    const userId = req.user.id; // Use the authenticated user's id
+    const userId = req.user.id;
     const { comment } = req.body;
 
     if (!postId || !userId || !comment) {
@@ -242,18 +186,24 @@ export const addComment = async (req, res) => {
       return res.status(400).json({ message: "Invalid Post ID." });
     }
 
-    const updatedPost = await blogPostModel.addComment(userId, postId, comment);
-    if (!updatedPost) {
+    let post = await blogPostModel.findById(postId);
+    if (!post) {
       return res
         .status(404)
         .json({ message: "Post not found or action failed" });
     }
+    post.comments.push({ user: userId, comment });
+    await post.save();
+    const updatedPost = await blogPostModel
+      .findById(postId)
+      .populate("author")
+      .populate("comments.user");
     return res.status(200).json(updatedPost);
   } catch (error) {
     console.error("Error in addComment:", error);
-    return res
-      .status(500)
-      .json({ error: error?.message ?? "Internal Server Error" });
+    return res.status(500).json({
+      error: error?.message || "Internal Server Error",
+    });
   }
 };
 
