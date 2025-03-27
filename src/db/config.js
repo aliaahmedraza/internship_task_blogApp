@@ -1,11 +1,18 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config();
-const dbURI = process.env.MONGO_URL || process.env
 
-const dbConfig = mongoose
-  .connect(dbURI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 15000, // Increase timeout
+      socketTimeoutMS: 20000, // Increase socket timeout
+    });
+    console.log("MongoDB new connected");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
 
-export default dbConfig;
+export default connectDB;
