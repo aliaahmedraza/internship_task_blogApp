@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config();
-const dbURI = process.env.MONGO_URL || "mongodb+srv://aliahmedrza:ritadanto@blogapp.iz2b4.mongodb.net/?retryWrites=true&w=majority&appName=blogApp";
 
 const dbConfig = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000, // Increase timeout to 30s
+      socketTimeoutMS: 45000, // Increase socket timeout
     });
-    console.log("MongoDB Connected...");
+    console.log("✅ MongoDB connected");
   } catch (error) {
-    console.error("MongoDB Connection Error:", error);
+    console.error("❌ MongoDB connection error:", error);
     process.exit(1);
   }
 };
+
 export default dbConfig;
