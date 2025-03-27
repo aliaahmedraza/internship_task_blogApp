@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: "https://iternshi-frontend-cxi4wv3h6-ali-ahmed-razas-projects.vercel.app",
+        origin: "https://blog-app-xi-sage.vercel.app",
         credentials: true,
         methods: "GET,POST,PUT,DELETE,PATCH",
         allowedHeaders: "Content-Type,Authorization",
