@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const dbURI = process.env.MONGO_URL || "mongodb://localhost:27017/mydatabase"; // Use a default local DB if env var is missing
+const dbURI = process.env.MONGO_URL || "mongodb+srv://aliahmedrza:ritadanto@blogapp.iz2b4.mongodb.net/?retryWrites=true&w=majority&appName=blogApp"; // Use a default local DB if env var is missing
 
 const connectDB = async () => {
   try {
